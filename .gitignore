@@ -1,0 +1,15 @@
+.venv/
+.build-venv/
+__pycache__/
+.pytest_cache/
+build/
+dist/
+artifacts/
+*.pt
+*.ts
+*.onnx
+assets/licenses/
+*.db*
+*.log
+.env*
+data/

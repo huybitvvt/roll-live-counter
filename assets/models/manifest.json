@@ -1,0 +1,17 @@
+{
+  "file": "roll-yoloe-11s.onnx",
+  "sha256": "be99e9e9a32e1cb6ed5b3aaf109762a84719ddf7ffbf6a1718a56f5a1383a4b8",
+  "size": 640,
+  "prompts": [
+    "cylinder",
+    "roll",
+    "insulation roll",
+    "foil roll",
+    "plastic roll",
+    "paper roll"
+  ],
+  "source": "https://github.com/ultralytics/assets/releases",
+  "checkpoint": "yoloe-11s-seg.pt",
+  "license": "AGPL-3.0",
+  "fine_tuned": false
+}

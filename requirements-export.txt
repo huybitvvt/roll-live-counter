@@ -1,0 +1,4 @@
+-r requirements-build.txt
+ultralytics==8.4.203
+onnx==1.23.2
+onnxslim==0.1.99
