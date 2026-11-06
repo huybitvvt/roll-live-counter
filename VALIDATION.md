@@ -35,8 +35,13 @@ occlusion handling across video. A successful installation does not establish
   with two ONNX threads. The requested scan rate is a cap, not a guaranteed FPS.
 - Slow results are shown on the exact analyzed image on request; old boxes are
   not painted over a different live image. Screenshot uses only the code-drawn input.
-- The frozen build, installer and public download are verified before release;
-  final details will be added after those checks.
+- Frozen executable passes the real-model UI smoke test: four confirmed identities,
+  three opt-in sample images, and successful shutdown. Eight embedded application
+  modules were compared to the public Python sources and match structurally.
+  PyTorch and Ultralytics runtime are excluded. Latest frozen full + crop update
+  measured 869 ms on the development CPU; timing varies with system load.
+- Installer and public-download verification are completed before publishing the
+  release and recorded with the release checksums.
 
 ## Not verified
 
