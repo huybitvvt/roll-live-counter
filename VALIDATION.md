@@ -40,8 +40,16 @@ occlusion handling across video. A successful installation does not establish
   modules were compared to the public Python sources and match structurally.
   PyTorch and Ultralytics runtime are excluded. Latest frozen full + crop update
   measured 869 ms on the development CPU; timing varies with system load.
-- Installer and public-download verification are completed before publishing the
-  release and recorded with the release checksums.
+- Windows installer ran silently as a normal user into an isolated test directory,
+  returned exit code 0 and required no restart. The installed EXE has SHA-256
+  `ec113803c8dbf482138097bd1bcd8e994dca372a1bdf1d8825e16a650472cead`,
+  identical to the checked frozen EXE. Its real-model UI run confirmed four
+  identities and saved three opt-in images, then exited successfully.
+- The published installer was downloaded through an unauthenticated HTTPS request.
+  Its 176,802,808 bytes match SHA-256
+  `732dd2473eb6b02d3f4e6697df5f2d0037d9478406d58fe54f63b6aeb27c18ba`.
+  Public repository visibility was checked without authentication. The release
+  contains `SHA256SUMS.txt` and `verification.json`.
 
 ## Not verified
 
