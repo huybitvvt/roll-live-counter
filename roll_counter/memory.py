@@ -87,8 +87,8 @@ class Memory:
         a,b,c,d = self.zone
         return a <= cx <= c and b <= cy <= d
 
-    def update(self, detections, now, shape):
-        if self.previous_time is not None and now-self.previous_time > 3.:
+    def update(self, detections, now, shape, continuity_known=False):
+        if not continuity_known and self.previous_time is not None and now-self.previous_time > 3.:
             self.reconnect()
         self.previous_time = now
         # Collect ALL visible identities first, before matching new detections.

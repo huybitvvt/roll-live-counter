@@ -23,10 +23,11 @@ def main():
     shape = None
     while time.monotonic()<deadline and received<30:
         try:
-            seq,stamp,frame = frames.get(timeout=.5)
+            seq,stamp,frame,epoch = frames.get(timeout=.5)
         except Empty:
             continue
         assert seq>previous
+        assert epoch == (0,0)
         previous = seq
         assert time.monotonic()-stamp < 3
         shape = frame.shape

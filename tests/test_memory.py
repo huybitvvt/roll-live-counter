@@ -82,6 +82,14 @@ def test_long_frame_gap_invalidates_tracker_bindings(memory):
     assert 1 in memory.candidates
 
 
+def test_slow_cpu_with_known_camera_continuity_still_confirms(memory):
+    memory.update([item(1)],0.,(480,640,3),continuity_known=True)
+    memory.update([item(1)],4.,(480,640,3),continuity_known=True)
+    assert memory.total == 1
+    memory.update([item(1)],8.,(480,640,3),continuity_known=True)
+    assert memory.total == 1
+
+
 def test_zone_controls_birth_not_following(memory):
     memory.zone = [0,0,.3,1]
     establish(memory,[item(1,500)])

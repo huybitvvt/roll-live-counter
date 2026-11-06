@@ -23,7 +23,7 @@ def latest_put(queue, item):
             pass
 
 
-def capture_worker(source, frames, status, stop, heartbeat):
+def capture_worker(source, frames, status, stop, heartbeat, generation=0):
     cv2.setNumThreads(1)
     frames.cancel_join_thread()
     status.cancel_join_thread()
@@ -51,6 +51,8 @@ def capture_worker(source, frames, status, stop, heartbeat):
         fps = min(30.,max(1.,fps or 20.))
         seq = 0
         last_publish = 0.
+        last_read = time.monotonic()
+        pause_epoch = 0
         latest_put(status, ('ready', 'Ảnh tĩnh' if still is not None else ('Video' if is_file else 'Camera')))
         while not stop.is_set():
             began = time.monotonic()
@@ -65,6 +67,9 @@ def capture_worker(source, frames, status, stop, heartbeat):
             # RTSP read would accumulate latency when a 25/30 FPS camera is
             # published to a 20 FPS preview.
             heartbeat.value = time.monotonic()
+            if not is_file and still is None and heartbeat.value-last_read > 3.:
+                pause_epoch += 1
+            last_read = heartbeat.value
             if not is_file and still is None and heartbeat.value-last_publish < .05:
                 stop.wait(.001)
                 continue
@@ -75,7 +80,7 @@ def capture_worker(source, frames, status, stop, heartbeat):
                 frame = cv2.resize(frame,(round(w*scale),round(h*scale)))
             seq += 1
             heartbeat.value = time.monotonic()
-            latest_put(frames,(seq,heartbeat.value,frame))
+            latest_put(frames,(seq,heartbeat.value,frame,(generation,pause_epoch)))
             if is_file or still is not None:
                 stop.wait(max(0.,1/fps-(time.monotonic()-began)))
     except Exception as exc:
@@ -134,7 +139,7 @@ def infer_worker(inbox, results, commands, stop, heartbeat, folder, settings):
         memory.zone = settings['zone']
         memory.enabled = settings.get('armed',False)
         tracker = create_tracker(settings['scan_fps'])
-        last_stamp = None
+        last_epoch = None
         last_data = 0.
         files = list((Path(folder)/'samples').glob('*.jpg')) if (Path(folder)/'samples').exists() else []
         sample_count = len(files)
@@ -160,15 +165,15 @@ def infer_worker(inbox, results, commands, stop, heartbeat, folder, settings):
                 elif kind == 'resolve':
                     memory.resolve(command['track'],command.get('id'),command.get('ignore',False))
             try:
-                seq,stamp,frame = inbox.get(timeout=.1)
+                seq,stamp,frame,epoch = inbox.get(timeout=.1)
             except Empty:
                 continue
             if time.monotonic()-stamp > 3.:
                 continue
-            if last_stamp is not None and stamp-last_stamp > 3.:
+            if last_epoch is not None and epoch != last_epoch:
                 memory.reconnect()
                 tracker = create_tracker(settings['scan_fps'])
-            last_stamp = stamp
+            last_epoch = epoch
             raw,ms = detector.detect(frame,settings['confidence'])
             # The trolley can occupy a small part of a wide camera view.
             # A second native-pixel crop pass improves sampling of its rolls,
@@ -196,7 +201,9 @@ def infer_worker(inbox, results, commands, stop, heartbeat, folder, settings):
                 latest_put(results,{'status':'Máy xử lý quá chậm; chưa cộng kết quả từ hình cũ. Hạ nhịp quét.'})
                 continue
             tracked = track_detections(tracker,raw,frame)
-            objects = memory.update(tracked,stamp,frame.shape)
+            # Capture supplies continuity epochs. Slow CPU sampling alone is
+            # not evidence that the camera lost its source or identities.
+            objects = memory.update(tracked,stamp,frame.shape,continuity_known=True)
             thumbnails = Path(folder)/'identities'
             thumbnails.mkdir(exist_ok=True)
             for obj in objects:

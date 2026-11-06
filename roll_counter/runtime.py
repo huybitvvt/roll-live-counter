@@ -20,6 +20,7 @@ class Runtime:
         self.ended = False
         self.running = False
         self.notice = ''
+        self.generation = 0
 
     def start(self):
         self.stop()
@@ -42,10 +43,12 @@ class Runtime:
         self.inference.start()
 
     def _camera(self):
+        self.generation += 1
+        self.last_seq = -1
         self.capture_beat.value = time.monotonic()
         self.last_capture_start = time.monotonic()
         self.capture = self.ctx.Process(target=capture_worker,args=(self.settings.source,self.frames,self.camera_status,
-                            self.capture_stop,self.capture_beat),daemon=True)
+                            self.capture_stop,self.capture_beat,self.generation),daemon=True)
         self.capture.start()
 
     def send(self,kind,**kwargs):

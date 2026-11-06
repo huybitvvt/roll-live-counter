@@ -16,10 +16,12 @@ occlusion handling across video. A successful installation does not establish
 
 ## Verification to record
 
-- 18 tests pass: cumulative identities, five old rolls moved and five new rolls
+- 19 tests pass: cumulative identities, five old rolls moved and five new rolls
   revealed, lost-ID review, explicit manual merge/new/ignore, co-visibility
   constraints, persistence, region membership, capacity, reset audit, CSV,
-  BoT-SORT integration, low-confidence track confirmation and Unicode/BOM settings.
+  BoT-SORT integration, low-confidence track confirmation, slow CPU with known
+  camera continuity, and Unicode/BOM settings. Capture epochs distinguish a real
+  source interruption from a long interval between inference results.
 - Native capture process receives 30 increasing frame sequences from a generated
   1280x720 video, queue capacity 2, process exits with code 0.
 - Real ONNX CPU execution and decoding succeeded. On a code-drawn scene containing
